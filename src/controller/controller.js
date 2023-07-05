@@ -106,11 +106,11 @@ const LoginUser = async (req,res) => {
         const {email , password} = req.body
 
         if(!email || !password) {
-        return res.status(400).send({status : false , message : "Please enter valid credentials "})}
+        return res.status(400).send({status : false , message : "Enter valid credentials "})}
 //==============================EMAIL============
 
         if(!validator.isEmail(email)) {
-        return res.status(400).send({status : false , message : "Please enter the valid emailId"})}
+        return res.status(400).send({status : false , message : "Enter the valid emailId"})}
         
         const user = await userModel.findOne({email : email})
 
