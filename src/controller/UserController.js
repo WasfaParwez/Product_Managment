@@ -48,8 +48,6 @@ const CreateUser = async (req,res)=>{
          const saltRounds = 10;
          const hashedPassword = await bycrpt.hash(password, saltRounds);
 
-//=============================ADDRESS======================================= 
-
         if (!address.shipping.street || !address.billing.street) {
            return  res.status(400).send({ status: false, message: 'Enter street name' })}
 
@@ -98,8 +96,6 @@ const CreateUser = async (req,res)=>{
     }
 }
 //============================================================================
-
-
 
 const LoginUser = async (req,res) => {
     try {
