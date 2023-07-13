@@ -28,14 +28,44 @@ To set up the project, you need to follow the specified steps for each feature, 
 
 By following this project structure, you can develop a comprehensive Product Management system with user authentication, product management, cart functionality, and order handling.
 
-User APIs
-POST /register
-Create a user document from request body. Request body must contain image.
-Upload image to S3 bucket and save it's public url in user document.
-Save password in encrypted format. (use bcrypt)
-Response format
-On success - Return HTTP status 201. Also return the user document. The response should be a JSON object like this
-On error - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like this
+## FEATURE I - User
+### Models
+- User Model
+```yaml
+{ 
+  fname: {string, mandatory},
+  lname: {string, mandatory},
+  email: {string, mandatory, valid email, unique},
+  profileImage: {string, mandatory}, // s3 link
+  phone: {string, mandatory, unique, valid Indian mobile number}, 
+  password: {string, mandatory, minLen 8, maxLen 15}, // encrypted password
+  address: {
+    shipping: {
+      street: {string, mandatory},
+      city: {string, mandatory},
+      pincode: {number, mandatory}
+    },
+    billing: {
+      street: {string, mandatory},
+      city: {string, mandatory},
+      pincode: {number, mandatory}
+    }
+  },
+  createdAt: {timestamp},
+  updatedAt: {timestamp}
+}
+```
+
+
+## User APIs 
+### POST /register
+- Create a user document from request body. Request body must contain image.
+- Upload image to S3 bucket and save it's public url in user document.
+- Save password in encrypted format. (use bcrypt)
+- __Response format__
+  - _**On success**_ - Return HTTP status 201. Also return the user document. The response should be a JSON object like [this](#successful-response-structure)
+  - _**On error**_ - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like [this](#error-response-structure)
+```yaml
 {
     "status": true,
     "message": "User created successfully",
@@ -64,14 +94,16 @@ On error - Return a suitable error message with a valid HTTP status code. The re
         "__v": 0
     }
 }
-POST /login
-Allow an user to login with their email and password.
-On a successful login attempt return the userId and a JWT token contatining the userId, exp, iat.
-NOTE: There is a slight change in response body. You should also return userId in addition to the JWT token.
+```
 
-Response format
-On success - Return HTTP status 200 and JWT token in response body. The response should be a JSON object like this
-On error - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like this
+### POST /login
+- Allow an user to login with their email and password.
+- On a successful login attempt return the userId and a JWT token contatining the userId, exp, iat.
+> **_NOTE:_** There is a slight change in response body. You should also return userId in addition to the JWT token.
+- __Response format__
+  - _**On success**_ - Return HTTP status 200 and JWT token in response body. The response should be a JSON object like [this](#successful-response-structure)
+  - _**On error**_ - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like [this](#error-response-structure)
+```yaml
 {
     "status": true,
     "message": "User login successfull",
@@ -80,12 +112,15 @@ On error - Return a suitable error message with a valid HTTP status code. The re
         "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2MTYyODc2YWJkY2I3MGFmZWVhZjljZjUiLCJpYXQiOjE2MzM4NDczNzYsImV4cCI6MTYzMzg4MzM3Nn0.PgcBPLLg4J01Hyin-zR6BCk7JHBY-RpuWMG_oIK7aV8"
     }
 }
-GET /user/:userId/profile (Authentication required)
-Allow an user to fetch details of their profile.
-Make sure that userId in url param and in token is same
-Response format
-On success - Return HTTP status 200 and returns the user document. The response should be a JSON object like this
-On error - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like this
+```
+
+## GET /user/:userId/profile (Authentication required)
+- Allow an user to fetch details of their profile.
+- Make sure that userId in url param and in token is same
+- __Response format__
+  - _**On success**_ - Return HTTP status 200 and returns the user document. The response should be a JSON object like [this](#successful-response-structure)
+  - _**On error**_ - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like [this](#error-response-structure)
+```yaml
 {
     "status": true,
     "message": "User profile details",
@@ -114,13 +149,16 @@ On error - Return a suitable error message with a valid HTTP status code. The re
         "__v": 0
     }
 }
-PUT /user/:userId/profile (Authentication and Authorization required)
-Allow an user to update their profile.
-A user can update all the fields
-Make sure that userId in url param and in token is same
-Response format
-On success - Return HTTP status 200. Also return the updated user document. The response should be a JSON object like this
-On error - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like this
+```
+
+## PUT /user/:userId/profile (Authentication and Authorization required)
+- Allow an user to update their profile.
+- A user can update all the fields
+- Make sure that userId in url param and in token is same
+- __Response format__
+  - _**On success**_ - Return HTTP status 200. Also return the updated user document. The response should be a JSON object like [this](#successful-response-structure)
+  - _**On error**_ - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like [this](#error-response-structure)
+```yaml
 {
     "status": true,
     "message": "User profile updated",
@@ -149,11 +187,15 @@ On error - Return a suitable error message with a valid HTTP status code. The re
         "__v": 0
     }
 }
-Note: Bcrypt Send form-data
+```
 
-FEATTURE II - Product
-Models
-Product Model
+Note: [Bcrypt](https://www.npmjs.com/package/bcrypt)
+Send [form-data](https://developer.mozilla.org/en-US/docs/Web/API/FormData)
+
+## FEATTURE II - Product
+### Models
+- Product Model
+```yaml
 { 
   title: {string, mandatory, unique},
   description: {string, mandatory},
@@ -170,45 +212,58 @@ Product Model
   createdAt: {timestamp},
   updatedAt: {timestamp},
 }
-Products API (No authentication required)
-POST /products
-Create a product document from request body.
-Upload product image to S3 bucket and save image public url in document.
-Response format
-On success - Return HTTP status 201. Also return the product document. The response should be a JSON object like this
-On error - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like this
-GET /products
-Returns all products in the collection that aren't deleted.
-Filters
-Size (The key for this filter will be 'size')
-Product name (The key for this filter will be 'name'). You should return all the products with name containing the substring recieved in this filter
-Price : greater than or less than a specific value. The keys are 'priceGreaterThan' and 'priceLessThan'.
-NOTE: For price filter request could contain both or any one of the keys. For example the query in the request could look like { priceGreaterThan: 500, priceLessThan: 2000 } or just { priceLessThan: 1000 } )
+```
 
-Sort
-Sorted by product price in ascending or descending. The key value pair will look like {priceSort : 1} or {priceSort : -1} eg /products?size=XL&name=Nit%20grit
-Response format
-On success - Return HTTP status 200. Also return the product documents. The response should be a JSON object like this
-On error - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like this
-GET /products/:productId
-Returns product details by product id
-Response format
-On success - Return HTTP status 200. Also return the product documents. The response should be a JSON object like this
-On error - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like this
-PUT /products/:productId
-Updates a product by changing at least one or all fields
-Check if the productId exists (must have isDeleted false and is present in collection). If it doesn't, return an HTTP status 404 with a response body like this
-Response format
-On success - Return HTTP status 200. Also return the updated product document. The response should be a JSON object like this
-On error - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like this
-DELETE /products/:productId
-Deletes a product by product id if it's not already deleted
-Response format
-On success - Return HTTP status 200. The response should be a JSON object like this
-On error - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like this
-FEATURE III - Cart
-Models
-Cart Model
+
+## Products API (_No authentication required_)
+### POST /products
+- Create a product document from request body.
+- Upload product image to S3 bucket and save image public url in document.
+- __Response format__
+  - _**On success**_ - Return HTTP status 201. Also return the product document. The response should be a JSON object like [this](#successful-response-structure)
+  - _**On error**_ - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like [this](#error-response-structure)
+
+### GET /products
+- Returns all products in the collection that aren't deleted.
+  - __Filters__
+    - Size (The key for this filter will be 'size')
+    - Product name (The key for this filter will be 'name'). You should return all the products with name containing the substring recieved in this filter
+    - Price : greater than or less than a specific value. The keys are 'priceGreaterThan' and 'priceLessThan'. 
+    
+> **_NOTE:_** For price filter request could contain both or any one of the keys. For example the query in the request could look like { priceGreaterThan: 500, priceLessThan: 2000 } or just { priceLessThan: 1000 } )
+    
+  - __Sort__
+    - Sorted by product price in ascending or descending. The key value pair will look like {priceSort : 1} or {priceSort : -1}
+  _eg_ /products?size=XL&name=Nit%20grit
+- __Response format__
+  - _**On success**_ - Return HTTP status 200. Also return the product documents. The response should be a JSON object like [this](#successful-response-structure)
+  - _**On error**_ - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like [this](#error-response-structure)
+
+### GET /products/:productId
+- Returns product details by product id
+- __Response format__
+  - _**On success**_ - Return HTTP status 200. Also return the product documents. The response should be a JSON object like [this](#successful-response-structure)
+  - _**On error**_ - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like [this](#error-response-structure)
+
+### PUT /products/:productId
+- Updates a product by changing at least one or all fields
+- Check if the productId exists (must have isDeleted false and is present in collection). If it doesn't, return an HTTP status 404 with a response body like [this](#error-response-structure)
+- __Response format__
+  - _**On success**_ - Return HTTP status 200. Also return the updated product document. The response should be a JSON object like [this](#successful-response-structure)
+  - _**On error**_ - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like [this](#error-response-structure)
+
+### DELETE /products/:productId
+- Deletes a product by product id if it's not already deleted
+- __Response format__
+  - _**On success**_ - Return HTTP status 200. The response should be a JSON object like [this](#successful-response-structure)
+  - _**On error**_ - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like [this](#error-response-structure)
+
+
+
+## FEATURE III - Cart
+### Models
+- Cart Model
+```yaml
 {
   userId: {ObjectId, refs to User, mandatory, unique},
   items: [{
@@ -220,55 +275,65 @@ Cart Model
   createdAt: {timestamp},
   updatedAt: {timestamp},
 }
-Cart APIs (authentication required as authorization header - bearer token)
-POST /users/:userId/cart (Add to cart)
-Create a cart for the user if it does not exist. Else add product(s) in cart.
-Get cart id in request body.
-Get productId in request body.
-Make sure that cart exist.
-Add a product(s) for a user in the cart.
-Make sure the userId in params and in JWT token match.
-Make sure the user exist
-Make sure the product(s) are valid and not deleted.
-Get product(s) details in response body.
-Response format
-On success - Return HTTP status 201. Also return the cart document. The response should be a JSON object like this
-On error - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like this
-PUT /users/:userId/cart (Remove product / Reduce a product's quantity from the cart)
-Updates a cart by either decrementing the quantity of a product by 1 or deleting a product from the cart.
-Get cart id in request body.
-Get productId in request body.
-Get key 'removeProduct' in request body.
-Make sure that cart exist.
-Key 'removeProduct' denotes whether a product is to be removed({removeProduct: 0}) or its quantity has to be decremented by 1({removeProduct: 1}).
-Make sure the userId in params and in JWT token match.
-Make sure the user exist
-Get product(s) details in response body.
-Check if the productId exists and is not deleted before updating the cart.
-Response format
-On success - Return HTTP status 200. Also return the updated cart document. The response should be a JSON object like this
-On error - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like this
-GET /users/:userId/cart
-Returns cart summary of the user.
-Make sure that cart exist.
-Make sure the userId in params and in JWT token match.
-Make sure the user exist
-Get product(s) details in response body.
-Response format
-On success - Return HTTP status 200. Return the cart document. The response should be a JSON object like this
-On error - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like this
-DELETE /users/:userId/cart
-Deletes the cart for the user.
-Make sure that cart exist.
-Make sure the userId in params and in JWT token match.
-Make sure the user exist
-cart deleting means array of items is empty, totalItems is 0, totalPrice is 0.
-Response format
-On success - Return HTTP status 204. Return a suitable message. The response should be a JSON object like this
-On error - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like this
-FEATURE IV - Order
-Models
-Order Model
+```
+
+
+## Cart APIs (_authentication required as authorization header - bearer token_)
+### POST /users/:userId/cart (Add to cart)
+- Create a cart for the user if it does not exist. Else add product(s) in cart.
+- Get cart id in request body.
+- Get productId in request body.
+- Make sure that cart exist.
+- Add a product(s) for a user in the cart.
+- Make sure the userId in params and in JWT token match.
+- Make sure the user exist
+- Make sure the product(s) are valid and not deleted.
+- Get product(s) details in response body.
+- __Response format__
+  - _**On success**_ - Return HTTP status 201. Also return the cart document. The response should be a JSON object like [this](#successful-response-structure)
+  - _**On error**_ - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like [this](#error-response-structure)
+
+### PUT /users/:userId/cart (Remove product / Reduce a product's quantity from the cart)
+- Updates a cart by either decrementing the quantity of a product by 1 or deleting a product from the cart.
+- Get cart id in request body.
+- Get productId in request body.
+- Get key 'removeProduct' in request body. 
+- Make sure that cart exist.
+- Key 'removeProduct' denotes whether a product is to be removed({removeProduct: 0}) or its quantity has to be decremented by 1({removeProduct: 1}).
+- Make sure the userId in params and in JWT token match.
+- Make sure the user exist
+- Get product(s) details in response body.
+- Check if the productId exists and is not deleted before updating the cart.
+- __Response format__
+  - _**On success**_ - Return HTTP status 200. Also return the updated cart document. The response should be a JSON object like [this](#successful-response-structure)
+  - _**On error**_ - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like [this](#error-response-structure)
+
+### GET /users/:userId/cart
+- Returns cart summary of the user.
+- Make sure that cart exist.
+- Make sure the userId in params and in JWT token match.
+- Make sure the user exist
+- Get product(s) details in response body.
+- __Response format__
+  - _**On success**_ - Return HTTP status 200. Return the cart document. The response should be a JSON object like [this](#successful-response-structure)
+  - _**On error**_ - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like [this](#error-response-structure)
+
+### DELETE /users/:userId/cart
+- Deletes the cart for the user.
+- Make sure that cart exist.
+- Make sure the userId in params and in JWT token match.
+- Make sure the user exist
+- cart deleting means array of items is empty, totalItems is 0, totalPrice is 0.
+- __Response format__
+  - _**On success**_ - Return HTTP status 204. Return a suitable message. The response should be a JSON object like [this](#successful-response-structure)
+  - _**On error**_ - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like [this](#error-response-structure)
+
+
+
+## FEATURE IV - Order
+### Models
+- Order Model
+```yaml
 {
   userId: {ObjectId, refs to User, mandatory},
   items: [{
@@ -285,24 +350,135 @@ Order Model
   createdAt: {timestamp},
   updatedAt: {timestamp},
 }
-Checkout/Order APIs (Authentication and authorization required)
-POST /users/:userId/orders
-Create an order for the user
-Make sure the userId in params and in JWT token match.
-Make sure the user exist
-Get cart details in the request body
-Response format
-On success - Return HTTP status 200. Also return the order document. The response should be a JSON object like this
-On error - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like this
-PUT /users/:userId/orders
-Updates an order status
-Make sure the userId in params and in JWT token match.
-Make sure the user exist
-Get order id in request body
-Make sure the order belongs to the user
-Make sure that only a cancellable order could be canceled. Else send an appropriate error message and response.
-Response format
-On success - Return HTTP status 200. Also return the updated order document. The response should be a JSON object like this
-On error - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like this
-Testing
-To test these apis create a new collection in Postman named Project 5 Shopping Cart
+```
+
+
+## Checkout/Order APIs (Authentication and authorization required)
+### POST /users/:userId/orders
+- Create an order for the user
+- Make sure the userId in params and in JWT token match.
+- Make sure the user exist
+- Get cart details in the request body
+- __Response format__
+  - _**On success**_ - Return HTTP status 200. Also return the order document. The response should be a JSON object like [this](#successful-response-structure)
+  - _**On error**_ - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like [this](#error-response-structure)
+
+## PUT /users/:userId/orders
+- Updates an order status
+- Make sure the userId in params and in JWT token match.
+- Make sure the user exist
+- Get order id in request body
+- Make sure the order belongs to the user
+- Make sure that only a cancellable order could be canceled. Else send an appropriate error message and response.
+- __Response format__
+  - _**On success**_ - Return HTTP status 200. Also return the updated order document. The response should be a JSON object like [this](#successful-response-structure)
+  - _**On error**_ - Return a suitable error message with a valid HTTP status code. The response should be a JSON object like [this](#error-response-structure)
+
+## Response
+
+### Successful Response structure
+```yaml
+{
+  status: true,
+  message: 'Success',
+  data: {
+
+  }
+}
+```
+### Error Response structure
+```yaml
+{
+  status: false,
+  message: ""
+}
+```
+
+## Collections
+## users
+```yaml
+{
+  _id: ObjectId("88abc190ef0288abc190ef02"),
+  fname: 'John',
+  lname: 'Doe',
+  email: 'johndoe@mailinator.com',
+  profileImage: 'http://function-up-test.s3.amazonaws.com/users/user/johndoe.jpg', // s3 link
+  phone: 9876543210,
+  password: '$2b$10$O.hrbBPCioVm237nAHYQ5OZy6k15TOoQSFhTT.recHBfQpZhM55Ty', // encrypted password
+  address: {
+    shipping: {
+      street: "110, Ridhi Sidhi Tower",
+      city: "Jaipur",
+      pincode: 400001
+    }, {mandatory}
+    billing: {
+      street: "110, Ridhi Sidhi Tower",
+      city: "Jaipur",
+      pincode: 400001
+    }
+  },
+  createdAt: "2021-09-17T04:25:07.803Z",
+  updatedAt: "2021-09-17T04:25:07.803Z",
+}
+```
+### products
+```yaml
+{
+  _id: ObjectId("88abc190ef0288abc190ef55"),
+  title: 'Nit Grit',
+  description: 'Dummy description',
+  price: 23.0,
+  currencyId: 'INR',
+  currencyFormat: '₹',
+  isFreeShipping: false,
+  productImage: 'http://function-up-test.s3.amazonaws.com/products/product/nitgrit.jpg',  // s3 link
+  style: 'Colloar',
+  availableSizes: ["S", "XS","M","X", "L","XXL", "XL"],
+  installments: 5,
+  deletedAt: null, 
+  isDeleted: false,
+  createdAt: "2021-09-17T04:25:07.803Z",
+  updatedAt: "2021-09-17T04:25:07.803Z",
+}
+```
+
+### carts
+```yaml
+{
+  "_id": ObjectId("88abc190ef0288abc190ef88"),
+  userId: ObjectId("88abc190ef0288abc190ef02"),
+  items: [{
+    productId: ObjectId("88abc190ef0288abc190ef55"),
+    quantity: 2
+  }, {
+    productId: ObjectId("88abc190ef0288abc190ef60"),
+    quantity: 1
+  }],
+  totalPrice: 50.99,
+  totalItems: 2,
+  createdAt: "2021-09-17T04:25:07.803Z",
+  updatedAt: "2021-09-17T04:25:07.803Z",
+}
+```
+
+### orders
+```yaml
+{
+  "_id": ObjectId("88abc190ef0288abc190ef88"),
+  userId: ObjectId("88abc190ef0288abc190ef02"),
+  items: [{
+    productId: ObjectId("88abc190ef0288abc190ef55"),
+    quantity: 2
+  }, {
+    productId: ObjectId("88abc190ef0288abc190ef60"),
+    quantity: 1
+  }],
+  totalPrice: 50.99,
+  totalItems: 2,
+  totalQuantity: 3,
+  cancellable: true,
+  status: 'pending'
+  createdAt: "2021-09-17T04:25:07.803Z",
+  updatedAt: "2021-09-17T04:25:07.803Z",
+}
+```
